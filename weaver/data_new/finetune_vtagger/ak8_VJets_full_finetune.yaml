@@ -1,0 +1,192 @@
+### use `&`, `|`, `~` for logical operations on numpy arrays
+### can use functions from `math`, `np` (numpy), and `ak` in the expression
+
+# to select ing jets, ensure that QCD ing jets from the resonant (signal) samples are not included (they are not excluded in the samples; only reco QCD jets are excluded)
+selection: >-
+    (fj_msoftdrop > 40) & ((fj_isWplus == 1) | (fj_isWminus == 1) | (fj_isZ == 1))
+
+### selection to apply at test time (i.e., when running w/ --predict)
+test_time_selection: >-
+    (fj_msoftdrop > 40) & ((fj_isWplus == 1) | (fj_isWminus == 1) | (fj_isZ == 1))
+
+new_variables:
+    ### [format] name: formula
+    ### can use functions from `math`, `np` (numpy), and `ak` in the expression
+    # classes for reweighting
+    label_Wplus:  (fj_isWplus == 1)
+    label_Wminus: (fj_isWminus == 1)
+    label_Z:      (fj_isZ == 1)
+
+    # charged and neutral ingpfcand
+    is_charged: pfcands_charge != 0
+    cpfcand_pt_log: pfcands_logpt[is_charged]
+    cpfcand_e_log: pfcands_loge[is_charged]
+    cpfcand_etarel: pfcands_deta[is_charged]
+    cpfcand_phirel: pfcands_dphi[is_charged]
+    cpfcand_abseta: pfcands_abseta[is_charged]
+    cpfcand_Rrel: pfcands_dr[is_charged]
+    cpfcand_charge: pfcands_charge[is_charged]
+    cpfcand_isEl: pfcands_isEl[is_charged]
+    cpfcand_isMu: pfcands_isMu[is_charged]
+    cpfcand_isChargedHad: pfcands_isChargedHad[is_charged]
+    cpfcand_lostInnerHits: pfcands_lostInnerHits[is_charged]
+    cpfcand_normchi2: pfcands_normchi2[is_charged]
+    cpfcand_quality: pfcands_quality[is_charged]
+    cpfcand_dz: pfcands_dz[is_charged]
+    cpfcand_dzsig: pfcands_dzsig[is_charged]
+    cpfcand_dxy: pfcands_d0[is_charged]
+    cpfcand_dxysig: pfcands_d0sig[is_charged]
+    # cpfcand_btagEtaRel: pfcand_btagEtaRel[is_charged]
+    # cpfcand_btagPtRatio: pfcand_btagPtRatio[is_charged]
+    # cpfcand_btagPParRatio: pfcand_btagPParRatio[is_charged]
+    cpfcand_px: pfcands_px[is_charged]
+    cpfcand_py: pfcands_py[is_charged]
+    cpfcand_pz: pfcands_pz[is_charged]
+    cpfcand_erel: pfcands_erel[is_charged]
+
+    npfcand_pt_log: pfcands_logpt[~is_charged]
+    npfcand_e_log: pfcands_loge[~is_charged]
+    npfcand_etarel: pfcands_deta[~is_charged]
+    npfcand_phirel: pfcands_dphi[~is_charged]
+    npfcand_abseta: pfcands_abseta[~is_charged]
+    npfcand_Rrel: pfcands_dr[~is_charged]
+    npfcand_isGamma: pfcands_isGamma[~is_charged]
+    npfcand_isNeutralHad: pfcands_isNeutralHad[~is_charged]
+    npfcand_px: pfcands_px[~is_charged]
+    npfcand_py: pfcands_py[~is_charged]
+    npfcand_pz: pfcands_pz[~is_charged]
+    npfcand_erel: pfcands_erel[~is_charged]
+
+    # masks
+    cpfcand_mask: ak.ones_like(cpfcand_px)
+    npfcand_mask: ak.ones_like(npfcand_px)
+
+preprocess:
+    ### method: [manual, auto] - whether to use manually specified parameters for variable standardization
+    method: auto
+    ### data_fraction: fraction of events to use when calculating the mean/scale for the standardization
+    data_fraction:
+
+inputs:
+    cpf_features:
+        length: 90
+        pad_mode: wrap
+        vars:
+            ### [format 1]: var_name (no transformation)
+            ### [format 2]: [var_name,
+            ###              subtract_by(optional, default=None, no transf. if preprocess.method=manual, auto transf. if preprocess.method=auto),
+            ###              multiply_by(optional, default=1),
+            ###              clip_min(optional, default=-5),
+            ###              clip_max(optional, default=5),
+            ###              pad_value(optional, default=0)]
+            - cpfcand_pt_log
+            - cpfcand_e_log
+            - cpfcand_etarel
+            - cpfcand_phirel
+            - cpfcand_abseta
+            - cpfcand_Rrel
+            - cpfcand_charge
+            - cpfcand_isEl
+            - cpfcand_isMu
+            - cpfcand_isChargedHad
+            - cpfcand_lostInnerHits
+            - cpfcand_normchi2
+            - cpfcand_quality
+            - cpfcand_dz
+            - cpfcand_dzsig
+            - cpfcand_dxy
+            - cpfcand_dxysig
+            # - [cpfcand_btagEtaRel, 1.5, 0.5]
+            # - [cpfcand_btagPtRatio, 0, 1]
+            # - [cpfcand_btagPParRatio, 0, 1]
+    cpf_vectors:
+        length: 90
+        pad_mode: wrap
+        vars:
+            - cpfcand_px
+            - cpfcand_py
+            - cpfcand_pz
+            - cpfcand_erel
+    cpf_mask:
+        length: 90
+        pad_mode: constant
+        vars:
+            - cpfcand_mask
+    npf_features:
+        length: 60
+        pad_mode: wrap
+        vars:
+            - npfcand_pt_log
+            - npfcand_e_log
+            - npfcand_etarel
+            - npfcand_phirel
+            - npfcand_abseta
+            - npfcand_Rrel
+            - npfcand_isGamma
+            - npfcand_isNeutralHad
+    npf_vectors:
+        length: 60
+        pad_mode: wrap
+        vars:
+            - npfcand_px
+            - npfcand_py
+            - npfcand_pz
+            - npfcand_erel
+    npf_mask:
+        length: 60
+        pad_mode: constant
+        vars:
+            - npfcand_mask
+
+labels:
+    ### type can be `simple`, `custom`, 'hybrid'
+    type: simple
+    value:
+        [
+            label_Wplus,
+            label_Wminus,
+            label_Z,
+        ]
+
+observers:
+    # Basic Kinematics (to check performance vs pt/mass)
+    - fj_pt
+    - fj_eta
+    - fj_phi
+    - fj_mass
+    - fj_msoftdrop
+
+    # Truth Labels (to check if the AI is getting it right)
+    - fj_isWplus
+    - fj_isWminus
+    - fj_isZ
+    - fj_genjetmass
+
+    # Sub-labels (if you want to see if W+ ud is harder than W+ cs)
+    - fj_isWplus_ud
+    - fj_isWplus_cs
+    - fj_isWminus_ud
+    - fj_isWminus_cs
+    - fj_isZ_bb
+    - fj_isZ_cc
+    - fj_isZ_qq
+
+weights:
+    ### [option 1] use precomputed weights stored in the input files
+    # use_precomputed_weights: true
+    # weight_branches: [weight, class_weight]
+    ### [option 2] compute weights on-the-fly using reweighting histograms
+    use_precomputed_weights: false
+    reweight_method: flat
+    reweight_vars:
+        fj_pt: [200, 251, 316, 398, 501, 631, 794, 1000, 1258, 1583, 1993, 2508, 3156, 3972, 5000]
+        fj_msoftdrop: [40.0, 46.3, 54.9, 63.7, 72.7, 82.0, 91.5, 101.3, 111.3, 121.5, 132.0, 142.7, 153.7, 164.9, 176.3, 188.0, 199.9, 212.1, 224.5, 237.1, 250.0, 263.1, 276.5, 290.1, 303.9, 318.0, 332.3, 346.9, 361.7, 376.7, 392.0, 407.5, 423.3, 439.3, 455.5, 472.0, 488.7, 505.7, 522.9, 540.3, 558.0, 575.9, 594.1, 612.5, 631.1, 650.0]
+    reweight_classes:
+        [
+          label_Wplus, label_Wminus, label_Z
+        ]
+    class_weights:
+      [
+        1, 1, 1
+      ]
+    reweight_hists:
