@@ -314,6 +314,10 @@ def _read_awkd(filepath, branches, load_range=None):
 
 def _read_parquet(filepath, branches, load_range=None):
     outputs = ak.from_parquet(filepath, columns=branches)
+    if isinstance(outputs, ak.Record):
+        # older preprocessing wrote a scalar Record (dict of arrays) instead of
+        # an Array of records; reconstruct a proper length-N Array from its fields
+        outputs = ak.Array({f: outputs[f] for f in ak.fields(outputs)})
     if load_range is not None:
         start = math.trunc(load_range[0] * len(outputs))
         stop = max(start + 1, math.trunc(load_range[1] * len(outputs)))
