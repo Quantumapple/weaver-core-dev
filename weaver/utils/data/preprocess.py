@@ -141,6 +141,9 @@ class AutoStandardizer(object):
                     params['center'] = None
                 else:
                     a = ak.to_numpy(ak.flatten(table[k], axis=None))
+                    if a.dtype == bool:
+                        # newer numpy disallows bool subtraction inside np.percentile
+                        a = a.astype(np.float32)
                     low, center, high = np.percentile(a, [16, 50, 84])
                     scale = max(high - center, center - low)
                     scale = 1 if scale == 0 else 1. / scale
