@@ -43,7 +43,7 @@ new_variables:
     cpfcand_py: pfcands_py[is_charged]
     cpfcand_pz: pfcands_pz[is_charged]
     cpfcand_erel: pfcands_erel[is_charged]
-    cpfcand_enery: np.exp(pfcands_loge[is_charged])
+    cpfcand_energy: np.exp(pfcands_loge[is_charged])
 
     npfcand_pt_log: pfcands_logpt[~is_charged]
     npfcand_e_log: pfcands_loge[~is_charged]
@@ -57,7 +57,7 @@ new_variables:
     npfcand_py: pfcands_py[~is_charged]
     npfcand_pz: pfcands_pz[~is_charged]
     npfcand_erel: pfcands_erel[~is_charged]
-    npfcand_enery: np.exp(pfcands_loge[~is_charged])
+    npfcand_energy: np.exp(pfcands_loge[~is_charged])
 
     # masks
     cpfcand_mask: ak.ones_like(cpfcand_px)
