@@ -26,6 +26,21 @@ def _build_new_variables(table, funcs):
     return table
 
 
+def _resolve_var_deps(names, var_funcs):
+    """Expand `names` to include intermediate var_funcs entries referenced
+    (directly or transitively) by their expressions."""
+    resolved = set()
+    stack = list(names)
+    while stack:
+        k = stack.pop()
+        if k in resolved:
+            continue
+        resolved.add(k)
+        if k in var_funcs:
+            stack.extend(_get_variable_names(var_funcs[k]))
+    return resolved
+
+
 def _clean_up(table, drop_branches):
     columns = [k for k in table.fields if k not in drop_branches]
     return table[columns]
@@ -102,16 +117,18 @@ class AutoStandardizer(object):
                     self.load_branches.add(k)
         if self._data_config.selection:
             self.load_branches.update(_get_variable_names(self._data_config.selection))
+        # expand to intermediate new_variables (e.g. `is_charged`) that keep_branches
+        # depend on, and make sure their own raw-branch dependencies get loaded too
+        self.build_vars = _resolve_var_deps(self.keep_branches, self._data_config.var_funcs)
+        for k in self.build_vars:
+            self.load_branches.update(_get_variable_names(self._data_config.var_funcs[k]))
         _logger.debug('[AutoStandardizer] keep_branches:\n  %s', ','.join(self.keep_branches))
         _logger.debug('[AutoStandardizer] load_branches:\n  %s', ','.join(self.load_branches))
         table = _read_files(filelist, self.load_branches, [self.load_range] * len(filelist),
                             show_progressbar=True, treename=self._data_config.treename)
         table = _apply_selection(table, self._data_config.selection)
-        # build all new_variables (not just `keep_branches`), matching dataset.py's
-        # main data-loading path: leaf vars here may reference intermediate helper
-        # vars (e.g. `is_charged`) defined elsewhere in `var_funcs`, and filtering to
-        # `keep_branches` silently drops those dependencies, causing FieldNotFoundError.
-        table = _build_new_variables(table, self._data_config.var_funcs)
+        table = _build_new_variables(
+            table, {k: v for k, v in self._data_config.var_funcs.items() if k in self.build_vars})
         table = _clean_up(table, self.load_branches - self.keep_branches)
         return table
 
@@ -174,12 +191,16 @@ class WeightMaker(object):
                 self.load_branches.add(k)
         if self._data_config.selection:
             self.load_branches.update(_get_variable_names(self._data_config.selection))
+        # see AutoStandardizer.read_file for why this dependency expansion is needed
+        self.build_vars = _resolve_var_deps(self.keep_branches, self._data_config.var_funcs)
+        for k in self.build_vars:
+            self.load_branches.update(_get_variable_names(self._data_config.var_funcs[k]))
         _logger.debug('[WeightMaker] keep_branches:\n  %s', ','.join(self.keep_branches))
         _logger.debug('[WeightMaker] load_branches:\n  %s', ','.join(self.load_branches))
         table = _read_files(filelist, self.load_branches, show_progressbar=True, treename=self._data_config.treename)
         table = _apply_selection(table, self._data_config.selection)
-        # see AutoStandardizer.read_file for why this must be unfiltered
-        table = _build_new_variables(table, self._data_config.var_funcs)
+        table = _build_new_variables(
+            table, {k: v for k, v in self._data_config.var_funcs.items() if k in self.build_vars})
         table = _clean_up(table, self.load_branches - self.keep_branches)
         return table
 
