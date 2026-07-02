@@ -118,10 +118,10 @@ class AutoStandardizer(object):
         if self._data_config.selection:
             self.load_branches.update(_get_variable_names(self._data_config.selection))
         # expand to intermediate new_variables (e.g. `is_charged`) that keep_branches
-        # depend on, and make sure their own raw-branch dependencies get loaded too
+        # depend on; `build_vars` already includes their raw-branch dependencies too,
+        # since _resolve_var_deps walks the full closure (synthetic vars + raw columns)
         self.build_vars = _resolve_var_deps(self.keep_branches, self._data_config.var_funcs)
-        for k in self.build_vars:
-            self.load_branches.update(_get_variable_names(self._data_config.var_funcs[k]))
+        self.load_branches.update(self.build_vars)
         _logger.debug('[AutoStandardizer] keep_branches:\n  %s', ','.join(self.keep_branches))
         _logger.debug('[AutoStandardizer] load_branches:\n  %s', ','.join(self.load_branches))
         table = _read_files(filelist, self.load_branches, [self.load_range] * len(filelist),
@@ -193,8 +193,7 @@ class WeightMaker(object):
             self.load_branches.update(_get_variable_names(self._data_config.selection))
         # see AutoStandardizer.read_file for why this dependency expansion is needed
         self.build_vars = _resolve_var_deps(self.keep_branches, self._data_config.var_funcs)
-        for k in self.build_vars:
-            self.load_branches.update(_get_variable_names(self._data_config.var_funcs[k]))
+        self.load_branches.update(self.build_vars)
         _logger.debug('[WeightMaker] keep_branches:\n  %s', ','.join(self.keep_branches))
         _logger.debug('[WeightMaker] load_branches:\n  %s', ','.join(self.load_branches))
         table = _read_files(filelist, self.load_branches, show_progressbar=True, treename=self._data_config.treename)
