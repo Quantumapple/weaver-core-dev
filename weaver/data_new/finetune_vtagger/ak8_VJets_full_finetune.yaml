@@ -67,7 +67,7 @@ preprocess:
     ### method: [manual, auto] - whether to use manually specified parameters for variable standardization
     method: auto
     ### data_fraction: fraction of events to use when calculating the mean/scale for the standardization
-    data_fraction:
+    data_fraction: 0.1
 
 inputs:
     cpf_features:
