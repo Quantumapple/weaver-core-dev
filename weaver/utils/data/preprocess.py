@@ -107,8 +107,11 @@ class AutoStandardizer(object):
         table = _read_files(filelist, self.load_branches, [self.load_range] * len(filelist),
                             show_progressbar=True, treename=self._data_config.treename)
         table = _apply_selection(table, self._data_config.selection)
-        table = _build_new_variables(
-            table, {k: v for k, v in self._data_config.var_funcs.items() if k in self.keep_branches})
+        # build all new_variables (not just `keep_branches`), matching dataset.py's
+        # main data-loading path: leaf vars here may reference intermediate helper
+        # vars (e.g. `is_charged`) defined elsewhere in `var_funcs`, and filtering to
+        # `keep_branches` silently drops those dependencies, causing FieldNotFoundError.
+        table = _build_new_variables(table, self._data_config.var_funcs)
         table = _clean_up(table, self.load_branches - self.keep_branches)
         return table
 
@@ -175,8 +178,8 @@ class WeightMaker(object):
         _logger.debug('[WeightMaker] load_branches:\n  %s', ','.join(self.load_branches))
         table = _read_files(filelist, self.load_branches, show_progressbar=True, treename=self._data_config.treename)
         table = _apply_selection(table, self._data_config.selection)
-        table = _build_new_variables(
-            table, {k: v for k, v in self._data_config.var_funcs.items() if k in self.keep_branches})
+        # see AutoStandardizer.read_file for why this must be unfiltered
+        table = _build_new_variables(table, self._data_config.var_funcs)
         table = _clean_up(table, self.load_branches - self.keep_branches)
         return table
 
