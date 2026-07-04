@@ -1,0 +1,194 @@
+### use `&`, `|`, `~` for logical operations on numpy arrays
+### can use functions from `math`, `np` (numpy), and `ak` in the expression
+
+### Step 1 of MLP-first fine-tuning: extract GloParT (ak8_MD_inclv10beta4_ul_manual) frozen-backbone
+### hidden-neuron embeddings via `weaver --predict`. Preprocessing/normalization parameters below are
+### copied verbatim from data_new/inclv10/ak8_MD_inclv10beta4_ul_manual.yaml to match the frozen
+### checkpoint's expected input distribution exactly. Dropped relative to the official config:
+###   - cpfcandlt_isLostTrack: not a placeholder -- true value (we don't merge a lost-tracks collection,
+###     so none of our charged candidates are lost tracks)
+###   - 6 tracker hit-layer-count features (the official config's last 6 cpf_features entries): omitted
+###     entirely, so cpf_features here is 24 columns, not 30. The predict/model-loading script must
+###     slice the frozen checkpoint's cpf Embed-layer weights to keep only columns [0:24].
+selection: >-
+    (fj_pt<5000) & (fj_msoftdrop>40) & (fj_msoftdrop<650) &
+    ((fj_isWplus == 1) | (fj_isWminus == 1) | (fj_isZ == 1))
+
+new_variables:
+    label_Wplus:  (fj_isWplus == 1)
+    label_Wminus: (fj_isWminus == 1)
+    label_Z:      (fj_isZ == 1)
+
+    is_charged: pfcands_charge != 0
+
+    # --- charged (cpf) --- already pt-sorted in tagger_input.py, no re-sort needed
+    cpfcandlt_pt_log_nopuppi_sort: pfcands_logpt[is_charged]
+    cpfcandlt_e_log_nopuppi_sort: pfcands_loge[is_charged]
+    cpfcandlt_etarel_sort: pfcands_deta[is_charged]
+    cpfcandlt_phirel_sort: pfcands_dphi[is_charged]
+    cpfcandlt_abseta_sort: pfcands_abseta[is_charged]
+    cpfcandlt_charge_sort: pfcands_charge[is_charged]
+    cpfcandlt_isEl_sort: pfcands_isEl[is_charged]
+    cpfcandlt_isMu_sort: pfcands_isMu[is_charged]
+    cpfcandlt_isChargedHad_sort: pfcands_isChargedHad[is_charged]
+    cpfcandlt_isLostTrack_sort: ak.zeros_like(pfcands_charge[is_charged])
+    cpfcandlt_VTX_ass_sort: pfcands_VTXass[is_charged]
+    cpfcandlt_lostInnerHits_sort: pfcands_lostInnerHits[is_charged]
+    cpfcandlt_normchi2_sort: pfcands_normchi2[is_charged]
+    cpfcandlt_quality_sort: pfcands_quality[is_charged]
+    cpfcandlt_dz_sort: pfcands_dz[is_charged]
+    cpfcandlt_dzsig_sort: pfcands_dzsig[is_charged]
+    cpfcandlt_dxy_sort: pfcands_d0[is_charged]
+    cpfcandlt_dxysig_sort: pfcands_d0sig[is_charged]
+    cpfcandlt_btagEtaRel_sort: pfcands_btagEtaRel[is_charged]
+    cpfcandlt_btagPtRatio_sort: pfcands_btagPtRatio[is_charged]
+    cpfcandlt_btagPParRatio_sort: pfcands_btagPParRatio[is_charged]
+    cpfcandlt_btagSip3dVal_sort: pfcands_btagSip3dVal[is_charged]
+    cpfcandlt_btagSip3dSig_sort: pfcands_btagSip3dSig[is_charged]
+    cpfcandlt_btagJetDistVal_sort: pfcands_btagJetDistVal[is_charged]
+    cpfcandlt_px_sort: pfcands_px[is_charged]
+    cpfcandlt_py_sort: pfcands_py[is_charged]
+    cpfcandlt_pz_sort: pfcands_pz[is_charged]
+    cpfcandlt_energy_sort: pfcands_energy[is_charged]
+    cpfcandlt_mask: ak.ones_like(cpfcandlt_etarel_sort)
+
+    # --- neutral (npf) ---
+    npfcand_pt_log_nopuppi: pfcands_logpt[~is_charged]
+    npfcand_e_log_nopuppi: pfcands_loge[~is_charged]
+    npfcand_etarel: pfcands_deta[~is_charged]
+    npfcand_phirel: pfcands_dphi[~is_charged]
+    npfcand_abseta: pfcands_abseta[~is_charged]
+    npfcand_isGamma: pfcands_isGamma[~is_charged]
+    npfcand_isNeutralHad: pfcands_isNeutralHad[~is_charged]
+    npfcand_px: pfcands_px[~is_charged]
+    npfcand_py: pfcands_py[~is_charged]
+    npfcand_pz: pfcands_pz[~is_charged]
+    npfcand_energy: pfcands_energy[~is_charged]
+    npfcand_mask: ak.ones_like(npfcand_etarel)
+
+    # --- sv: only rename needed, rest already matches by name ---
+    sv_etarel: sv_deta
+    sv_phirel: sv_dphi
+    sv_mask: ak.ones_like(sv_etarel)
+
+preprocess:
+    ### method: [manual, auto] - whether to use manually specified parameters for variable standardization
+    ### manual is required here: these are the frozen model's own training-time constants, not
+    ### statistics computed from our data.
+    method: manual
+    data_fraction:
+
+inputs:
+    cpf_features:
+        length: 90
+        pad_mode: wrap
+        vars:
+            - [cpfcandlt_pt_log_nopuppi_sort, 1, 0.5]
+            - [cpfcandlt_e_log_nopuppi_sort, 1.3, 0.5]
+            - cpfcandlt_etarel_sort
+            - cpfcandlt_phirel_sort
+            - [cpfcandlt_abseta_sort, 0.6, 1.6]
+            - cpfcandlt_charge_sort
+            - cpfcandlt_isEl_sort
+            - cpfcandlt_isMu_sort
+            - cpfcandlt_isChargedHad_sort
+            - cpfcandlt_isLostTrack_sort
+            - [cpfcandlt_VTX_ass_sort, 4, 0.3]
+            - cpfcandlt_lostInnerHits_sort
+            - [cpfcandlt_normchi2_sort, 5, 0.2]
+            - [cpfcandlt_quality_sort, 0, 0.2]
+            - [cpfcandlt_dz_sort, 0, 180]
+            - [cpfcandlt_dzsig_sort, 0, 0.9]
+            - [cpfcandlt_dxy_sort, 0.0, 300]
+            - [cpfcandlt_dxysig_sort, 0, 1.0]
+            - [cpfcandlt_btagEtaRel_sort, 1.5, 0.5]
+            - [cpfcandlt_btagPtRatio_sort, 0, 1]
+            - [cpfcandlt_btagPParRatio_sort, 0, 1]
+            - [cpfcandlt_btagSip3dVal_sort, 0, 100]
+            - [cpfcandlt_btagSip3dSig_sort, 0, 0.5]
+            - [cpfcandlt_btagJetDistVal_sort, 0, 40]
+    cpf_vectors:
+        length: 90
+        pad_mode: wrap
+        vars:
+            - [cpfcandlt_px_sort, null]
+            - [cpfcandlt_py_sort, null]
+            - [cpfcandlt_pz_sort, null]
+            - [cpfcandlt_energy_sort, null]
+    cpf_mask:
+        length: 90
+        pad_mode: constant
+        vars:
+            - cpfcandlt_mask
+    npf_features:
+        length: 60
+        pad_mode: wrap
+        vars:
+            - [npfcand_pt_log_nopuppi, 1, 0.5]
+            - [npfcand_e_log_nopuppi, 1.3, 0.5]
+            - npfcand_etarel
+            - npfcand_phirel
+            - [npfcand_abseta, 0.6, 1.6]
+            - npfcand_isGamma
+            - npfcand_isNeutralHad
+    npf_vectors:
+        length: 60
+        pad_mode: wrap
+        vars:
+            - [npfcand_px, null]
+            - [npfcand_py, null]
+            - [npfcand_pz, null]
+            - [npfcand_energy, null]
+    npf_mask:
+        length: 60
+        pad_mode: constant
+        vars:
+            - npfcand_mask
+    sv_features:
+        length: 10
+        pad_mode: wrap
+        vars:
+            - [sv_pt_log, 4, 0.6]
+            - [sv_mass, 1.2, 0.3]
+            - sv_etarel
+            - sv_phirel
+            - [sv_abseta, 0.5, 1.6]
+            - [sv_ntracks, 3, 1]
+            - [sv_normchi2, 0.8, 0.6]
+            - [sv_dxy, 0.4, 0.25]
+            - [sv_dxysig, 7, 0.02]
+            - [sv_d3d, 0.5, 0.2]
+            - [sv_d3dsig, 7, 0.02]
+    sv_vectors:
+        length: 10
+        pad_mode: wrap
+        vars:
+            - [sv_px, null]
+            - [sv_py, null]
+            - [sv_pz, null]
+            - [sv_energy, null]
+    sv_mask:
+        length: 10
+        pad_mode: constant
+        vars:
+            - sv_mask
+
+labels:
+    ### type can be `simple`, `custom`
+    type: simple
+    value: [label_Wplus, label_Wminus, label_Z]
+
+observers:
+    - fj_pt
+    - fj_eta
+    - fj_phi
+    - fj_mass
+    - fj_msoftdrop
+    - fj_genjetmass
+    - fj_isWplus_ud
+    - fj_isWplus_cs
+    - fj_isWminus_ud
+    - fj_isWminus_cs
+    - fj_isZ_bb
+    - fj_isZ_cc
+    - fj_isZ_qq
