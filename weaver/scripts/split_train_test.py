@@ -30,6 +30,13 @@ def main():
     test_idx = np.where(test_mask)[0]
     trainval_idx = np.where(~test_mask)[0]
 
+    # The source file is class-ordered (all of one class's events, then the next), inherited from
+    # how Step 1 concatenated input files. weaver's internal train/val split (via --train-val-split)
+    # is a positional slice of row order, NOT a shuffle -- so row order must be randomized here,
+    # or train/val can end up with disjoint classes.
+    rng.shuffle(trainval_idx)
+    rng.shuffle(test_idx)
+
     ak.to_parquet(arr[trainval_idx], args.trainval_output, compression='LZ4', compression_level=4)
     ak.to_parquet(arr[test_idx], args.test_output, compression='LZ4', compression_level=4)
 
