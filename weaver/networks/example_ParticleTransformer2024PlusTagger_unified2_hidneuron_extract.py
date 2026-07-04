@@ -117,7 +117,7 @@ def get_save_fn(data_config, **kwargs):
         n_reg = scores_reg.shape[1] - N_HIDDEN
         hidden = scores_reg[:, n_reg:]
         for i in range(N_HIDDEN):
-            output[f'fj_ParT_hidNeuron{i:03d}'] = hidden[:, i]
+            output[f'fj_ParT_hidNeuron{i:03d}'] = np.ascontiguousarray(hidden[:, i])
 
         for k, v in labels.items():
             if v.ndim == 1:
