@@ -954,7 +954,7 @@ def save_root(args, output_path, data_config, scores, labels, observers, save_fn
     _write_root(output_path, output)
 
 
-def save_parquet(args, output_path, scores, labels, observers, save_fn):
+def save_parquet(args, output_path, data_config, scores, labels, observers, save_fn):
     """
     Saves as parquet file
     :param scores:
@@ -963,6 +963,11 @@ def save_parquet(args, output_path, scores, labels, observers, save_fn):
     :return:
     """
     import awkward as ak
+    if save_fn is not None:
+        output = save_fn(args, data_config, scores, labels, observers)
+        ak.to_parquet(ak.Array(output), output_path, compression='LZ4', compression_level=4)
+        return
+
     output = {'scores': scores}
     output.update(labels)
     output.update(observers)
@@ -1192,7 +1197,7 @@ def _main(args):
                 if output_path.endswith('.root'):
                     save_root(args, output_path, data_config, scores, labels, observers, save_fn)
                 else:
-                    save_parquet(args, output_path, scores, labels, observers, save_fn)
+                    save_parquet(args, output_path, data_config, scores, labels, observers, save_fn)
                 _logger.info('Written output to %s' % output_path, color='bold')
 
 
