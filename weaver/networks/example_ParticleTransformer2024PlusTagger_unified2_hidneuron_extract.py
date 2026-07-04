@@ -130,7 +130,7 @@ def get_save_fn(data_config, **kwargs):
         majority_len = max(set(lengths.values()), key=list(lengths.values()).count)
         mismatched = {k: n for k, n in lengths.items() if n != majority_len}
         if mismatched:
-            _logger.warning('save_fn: length mismatch vs majority (%d): %s', majority_len, mismatched)
+            _logger.info('save_fn: length mismatch vs majority (%d): %s', majority_len, mismatched)
 
         return output
     return save_fn
