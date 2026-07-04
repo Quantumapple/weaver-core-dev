@@ -192,3 +192,9 @@ observers:
     - fj_isZ_bb
     - fj_isZ_cc
     - fj_isZ_qq
+    ### saved directly here (not derived from _label_ downstream) since weaver's variable-name
+    ### resolver excludes any underscore-prefixed identifier -- `_label_` can never be referenced
+    ### in a later yaml's new_variables expression, so the boolean class flags must be captured now.
+    - label_Wplus
+    - label_Wminus
+    - label_Z
