@@ -58,5 +58,6 @@ def get_model(data_config, **kwargs):
     return model, model_info
 
 
-def get_loss(data_config, **kwargs):
-    return torch.nn.CrossEntropyLoss()
+def get_loss(data_config, class_weights=None, **kwargs):
+    weight = torch.tensor(class_weights, dtype=torch.float32) if class_weights is not None else None
+    return torch.nn.CrossEntropyLoss(weight=weight)
