@@ -59,5 +59,14 @@ def get_model(data_config, **kwargs):
 
 
 def get_loss(data_config, class_weights=None, **kwargs):
-    weight = torch.tensor(class_weights, dtype=torch.float32) if class_weights is not None else None
-    return torch.nn.CrossEntropyLoss(weight=weight)
+    if class_weights is None:
+        return torch.nn.CrossEntropyLoss()
+    # train.py never calls `.to(dev)` on the loss function (only on the model), so a plain
+    # `CrossEntropyLoss(weight=...)` would leave its weight tensor stuck on CPU while logits
+    # run on GPU -- move it to the logits' device on every call instead.
+    weight = torch.tensor(class_weights, dtype=torch.float32)
+
+    def weighted_cross_entropy(input, target):
+        return torch.nn.functional.cross_entropy(input, target, weight=weight.to(input.device))
+
+    return weighted_cross_entropy
