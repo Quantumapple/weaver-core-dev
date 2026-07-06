@@ -12,12 +12,13 @@
 ###     slice the frozen checkpoint's cpf Embed-layer weights to keep only columns [0:24].
 selection: >-
     (fj_pt<5000) & (fj_msoftdrop>40) & (fj_msoftdrop<650) &
-    ((fj_isWplus == 1) | (fj_isWminus == 1) | (fj_isZ == 1))
+    ((fj_isWplus == 1) | (fj_isWminus == 1) | (fj_isZ == 1) | (fj_isQCD_Matched == 1))
 
 new_variables:
     label_Wplus:  (fj_isWplus == 1)
     label_Wminus: (fj_isWminus == 1)
     label_Z:      (fj_isZ == 1)
+    label_QCD:    (fj_isQCD_Matched == 1)
 
     is_charged: pfcands_charge != 0
 
@@ -176,7 +177,7 @@ inputs:
 labels:
     ### type can be `simple`, `custom`
     type: simple
-    value: [label_Wplus, label_Wminus, label_Z]
+    value: [label_Wplus, label_Wminus, label_Z, label_QCD]
 
 observers:
     - fj_pt
@@ -192,9 +193,15 @@ observers:
     - fj_isZ_bb
     - fj_isZ_cc
     - fj_isZ_qq
+    - fj_isQCD_bb
+    - fj_isQCD_b
+    - fj_isQCD_cc
+    - fj_isQCD_c
+    - fj_isQCD_other
     ### saved directly here (not derived from _label_ downstream) since weaver's variable-name
     ### resolver excludes any underscore-prefixed identifier -- `_label_` can never be referenced
     ### in a later yaml's new_variables expression, so the boolean class flags must be captured now.
     - label_Wplus
     - label_Wminus
     - label_Z
+    - label_QCD

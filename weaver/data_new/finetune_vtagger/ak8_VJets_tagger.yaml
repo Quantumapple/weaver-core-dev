@@ -6,10 +6,11 @@
 ### No selection here: Step 1's own selection (fj_pt, fj_msoftdrop, W/Z matching) already filtered
 ### the jets before saving the extraction output that this yaml reads.
 
-### class_Wplus/class_Wminus/class_Z are real columns in the extraction output (not derived here):
-### weaver's variable-name resolver excludes underscore-prefixed identifiers, so `_label_` can never
-### be referenced in a new_variables expression -- these booleans must already exist as raw columns
-### (see ak8_VJets_hidneuron_extraction.yaml's observers, or scripts/add_class_labels.py for older files).
+### label_Wplus/label_Wminus/label_Z/label_QCD are real columns in the extraction output (not derived
+### here): weaver's variable-name resolver excludes underscore-prefixed identifiers, so `_label_` can
+### never be referenced in a new_variables expression -- these booleans must already exist as raw
+### columns (see ak8_VJets_hidneuron_extraction.yaml's observers). Older extractions (pre-QCD, e.g.
+### 01_baseline) used class_Wplus/class_Wminus/class_Z instead, patched in via scripts/add_class_labels.py.
 
 preprocess:
    ### method: [manual, auto] - whether to use manually specified parameters for variable standardization
@@ -291,7 +292,7 @@ labels:
    ### type can be `simple`, `custom`
    ### [option 1] use `simple` for binary/multi-class classification, then `value` is a list of 0-1 labels
    type: simple
-   value: [class_Wplus, class_Wminus, class_Z]
+   value: [label_Wplus, label_Wminus, label_Z, label_QCD]
 
    ### [option 2] otherwise use `custom` to define the label, then `value` is a map
    # type: custom
@@ -303,9 +304,10 @@ observers:
    - fj_msoftdrop
    - fj_eta
    - fj_phi
-   - class_Wplus
-   - class_Wminus
-   - class_Z
+   - label_Wplus
+   - label_Wminus
+   - label_Z
+   - label_QCD
 
 weights:
    ### [option 1] use precomputed weights stored in the input files
@@ -319,6 +321,6 @@ weights:
    reweight_vars:
       fj_pt: [200, 2500]
       fj_msoftdrop: [-10000, 10000]
-   reweight_classes: [class_Wplus, class_Wminus, class_Z]
-   class_weights: [1, 1, 1]
+   reweight_classes: [label_Wplus, label_Wminus, label_Z, label_QCD]
+   class_weights: [1, 1, 1, 1]
    reweight_hists:
