@@ -85,7 +85,7 @@ def _preprocess(table, data_config, options):
     # apply selection
     table = _apply_selection(table, data_config.selection if options['training'] else data_config.test_time_selection)
     if len(table) == 0:
-        return []
+        return table, np.array([], dtype=np.int64)
     # define new variables
     table = _build_new_variables(table, data_config.var_funcs)
     # check labels
