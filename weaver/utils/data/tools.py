@@ -42,6 +42,10 @@ def _pad(a, maxlen, value=0, dtype='float32'):
 
 def _repeat_pad(a, maxlen, shuffle=False, dtype='float32'):
     x = ak.to_numpy(ak.flatten(a))
+    if len(x) == 0:
+        # Nothing to repeat/wrap from -- every event in this chunk has zero entries for this
+        # collection (e.g. no secondary vertices). Fall back to plain zero-padding.
+        return ak.values_astype(_pad(a, maxlen), dtype)
     x = np.tile(x, int(np.ceil(len(a) * maxlen / len(x))))
     if shuffle:
         np.random.shuffle(x)
