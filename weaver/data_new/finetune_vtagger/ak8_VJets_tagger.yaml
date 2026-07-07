@@ -308,6 +308,27 @@ observers:
    - label_Wminus
    - label_Z
    - label_QCD
+   # Official CMS tagger scores, carried through for benchmarking against our fine-tuned model
+   - fj_globalParT3_WvsQCD
+   - fj_globalParT3_QCD
+   - fj_globalParT3_Xbb
+   - fj_globalParT3_Xcc
+   - fj_globalParT3_Xcs
+   - fj_globalParT3_Xqq
+   - fj_particleNetWithMass_WvsQCD
+   - fj_particleNetWithMass_ZvsQCD
+   - fj_particleNetWithMass_QCD
+   - fj_particleNet_QCD0HF
+   - fj_particleNet_QCD1HF
+   - fj_particleNet_QCD2HF
+   - fj_particleNet_XqqVsQCD
+   - fj_particleNet_XbbVsQCD
+   - fj_particleNet_XccVsQCD
+   - fj_particleNetLegacy_QCD
+   - fj_particleNetLegacy_Xbb
+   - fj_particleNetLegacy_Xcc
+   - fj_particleNetLegacy_Xqq
+   - fj_particleNetLegacy_mass
 
 weights:
    ### [option 1] use precomputed weights stored in the input files

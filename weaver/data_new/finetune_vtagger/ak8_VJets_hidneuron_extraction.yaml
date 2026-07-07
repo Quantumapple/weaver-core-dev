@@ -198,6 +198,27 @@ observers:
     - fj_isQCD_cc
     - fj_isQCD_c
     - fj_isQCD_other
+    # Official CMS tagger scores, for benchmarking against our fine-tuned model
+    - fj_globalParT3_WvsQCD
+    - fj_globalParT3_QCD
+    - fj_globalParT3_Xbb
+    - fj_globalParT3_Xcc
+    - fj_globalParT3_Xcs
+    - fj_globalParT3_Xqq
+    - fj_particleNetWithMass_WvsQCD
+    - fj_particleNetWithMass_ZvsQCD
+    - fj_particleNetWithMass_QCD
+    - fj_particleNet_QCD0HF
+    - fj_particleNet_QCD1HF
+    - fj_particleNet_QCD2HF
+    - fj_particleNet_XqqVsQCD
+    - fj_particleNet_XbbVsQCD
+    - fj_particleNet_XccVsQCD
+    - fj_particleNetLegacy_QCD
+    - fj_particleNetLegacy_Xbb
+    - fj_particleNetLegacy_Xcc
+    - fj_particleNetLegacy_Xqq
+    - fj_particleNetLegacy_mass
     ### saved directly here (not derived from _label_ downstream) since weaver's variable-name
     ### resolver excludes any underscore-prefixed identifier -- `_label_` can never be referenced
     ### in a later yaml's new_variables expression, so the boolean class flags must be captured now.
