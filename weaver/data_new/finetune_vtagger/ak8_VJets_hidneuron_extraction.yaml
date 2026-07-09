@@ -7,9 +7,8 @@
 ### checkpoint's expected input distribution exactly. Dropped relative to the official config:
 ###   - cpfcandlt_isLostTrack: not a placeholder -- true value (we don't merge a lost-tracks collection,
 ###     so none of our charged candidates are lost tracks)
-###   - 6 tracker hit-layer-count features (the official config's last 6 cpf_features entries): omitted
-###     entirely, so cpf_features here is 24 columns, not 30. The predict/model-loading script must
-###     slice the frozen checkpoint's cpf Embed-layer weights to keep only columns [0:24].
+### 07_baseline_tracker: new NanoAODs now carry the 6 tracker hit-layer-count features, so
+### cpf_features is back to the full 30 columns and the original (unsliced) checkpoint is used.
 selection: >-
     (fj_pt<5000) & (fj_msoftdrop>40) & (fj_msoftdrop<650) &
     ((fj_isWplus == 1) | (fj_isWminus == 1) | (fj_isZ == 1) | (fj_isQCD_Matched == 1))
@@ -47,6 +46,12 @@ new_variables:
     cpfcandlt_btagSip3dVal_sort: pfcands_btagSip3dVal[is_charged]
     cpfcandlt_btagSip3dSig_sort: pfcands_btagSip3dSig[is_charged]
     cpfcandlt_btagJetDistVal_sort: pfcands_btagJetDistVal[is_charged]
+    cpfcandlt_pixelBarrelLayersWithMeasurement_sort: pfcands_pixelBarrelLayersWithMeasurement[is_charged]
+    cpfcandlt_pixelEndcapLayersWithMeasurement_sort: pfcands_pixelEndcapLayersWithMeasurement[is_charged]
+    cpfcandlt_stripTECLayersWithMeasurement_sort: pfcands_stripTECLayersWithMeasurement[is_charged]
+    cpfcandlt_stripTIBLayersWithMeasurement_sort: pfcands_stripTIBLayersWithMeasurement[is_charged]
+    cpfcandlt_stripTIDLayersWithMeasurement_sort: pfcands_stripTIDLayersWithMeasurement[is_charged]
+    cpfcandlt_stripTOBLayersWithMeasurement_sort: pfcands_stripTOBLayersWithMeasurement[is_charged]
     cpfcandlt_px_sort: pfcands_px[is_charged]
     cpfcandlt_py_sort: pfcands_py[is_charged]
     cpfcandlt_pz_sort: pfcands_pz[is_charged]
@@ -108,6 +113,12 @@ inputs:
             - [cpfcandlt_btagSip3dVal_sort, 0, 100]
             - [cpfcandlt_btagSip3dSig_sort, 0, 0.5]
             - [cpfcandlt_btagJetDistVal_sort, 0, 40]
+            - [cpfcandlt_pixelBarrelLayersWithMeasurement_sort, 0, 0.1]
+            - [cpfcandlt_pixelEndcapLayersWithMeasurement_sort, 0, 0.1]
+            - [cpfcandlt_stripTECLayersWithMeasurement_sort, 0, 0.1]
+            - [cpfcandlt_stripTIBLayersWithMeasurement_sort, 0, 0.1]
+            - [cpfcandlt_stripTIDLayersWithMeasurement_sort, 0, 0.1]
+            - [cpfcandlt_stripTOBLayersWithMeasurement_sort, 0, 0.1]
     cpf_vectors:
         length: 90
         pad_mode: wrap
