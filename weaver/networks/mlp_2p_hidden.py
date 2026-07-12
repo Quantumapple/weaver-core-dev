@@ -48,7 +48,12 @@ def get_model(data_config, **kwargs):
     prelayer_params = (32, 32)
     # 10_hidden_layers: first real hidden-layer capacity in the main mlp path (288 -> 128 -> 64 ->
     # num_classes), instead of the single linear readout used in every prior run (01-09).
-    layer_params = (128, 64)
+    # 17_smaller_hidden_layers: 14/15/16 (dropout on the 128,64 architecture) showed test accuracy
+    # rising monotonically with dropout strength (up to p=0.5) with no sign of underfitting --
+    # suggesting 128,64 has more capacity than this problem needs. Testing a much smaller
+    # architecture (a quarter of the units: 32,16) directly, with dropout back to 0, to see if the
+    # capacity reduction alone (no regularization needed) avoids the severe overfitting seen in 10.
+    layer_params = (32, 16)
     preinput_dims = len(data_config.input_dicts['basic'])
     input_dims = len(data_config.input_dicts['highlevel'])
     num_classes = len(data_config.label_value)
