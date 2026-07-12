@@ -62,7 +62,10 @@ def get_model(data_config, **kwargs):
     # (11/12/13 showed weight decay only trades overfitting for underfitting, never beating the
     # 09_relu_fix baseline). weight_decay is back to 0 (not passed via --optimizer-option) so this
     # isolates dropout's effect alone.
-    dropout_p = 0.3
+    # 15_hidden_dropout_0p15: p=0.3 (14) already fully closed the train/val gap (eval-mode train
+    # 0.6299 vs test 0.6292) with no headroom left -- trying a smaller value to see if some of the
+    # remaining gap to 09's baseline (0.6413) can be recovered without reopening the gap.
+    dropout_p = 0.15
     preinput_dims = len(data_config.input_dicts['basic'])
     input_dims = len(data_config.input_dicts['highlevel'])
     num_classes = len(data_config.label_value)
