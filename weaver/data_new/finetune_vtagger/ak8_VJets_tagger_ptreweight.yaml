@@ -1,0 +1,355 @@
+### use `&`, `|`, `~` for logical operations on numpy arrays
+### can use functions from `math`, `np` (numpy), and `ak` in the expression
+
+### Step 2 of MLP-first fine-tuning: train a new MLP head on the 256-dim GloParT frozen-backbone
+### hidden-neuron embeddings extracted in Step 1 (ak8_VJets_hidneuron_extraction.yaml + weaver --predict).
+### No selection here: Step 1's own selection (fj_pt, fj_msoftdrop, W/Z matching) already filtered
+### the jets before saving the extraction output that this yaml reads.
+
+### label_Wplus/label_Wminus/label_Z/label_QCD are real columns in the extraction output (not derived
+### here): weaver's variable-name resolver excludes underscore-prefixed identifiers, so `_label_` can
+### never be referenced in a new_variables expression -- these booleans must already exist as raw
+### columns (see ak8_VJets_hidneuron_extraction.yaml's observers). Older extractions (pre-QCD, e.g.
+### 01_baseline) used class_Wplus/class_Wminus/class_Z instead, patched in via scripts/add_class_labels.py.
+
+### 08_pt_reweighting variant: copy of ak8_VJets_tagger.yaml (unchanged) with real fj_pt reweighting
+### bins turned on (was a 1-bin no-op in 06_baseline_qcd/07_baseline_tracker). See
+### run_outputs/08_pt_reweighting/experiments.md for how the bin edges were derived.
+
+preprocess:
+   ### method: [manual, auto] - whether to use manually specified parameters for variable standardization
+   ### auto: this MLP is trained from scratch on our own embeddings, so standardize from our own data
+   ### rather than reusing manual constants (there's no external pretrained scale to match here).
+   method: auto
+   ### data_fraction: fraction of events to use when calculating the mean/scale for the standardization
+   data_fraction: 0.2
+
+inputs:
+   basic:
+      length: null
+      vars:
+         - fj_pt
+         - fj_msoftdrop
+
+   highlevel:
+      length: null
+      vars:
+         - fj_ParT_hidNeuron000
+         - fj_ParT_hidNeuron001
+         - fj_ParT_hidNeuron002
+         - fj_ParT_hidNeuron003
+         - fj_ParT_hidNeuron004
+         - fj_ParT_hidNeuron005
+         - fj_ParT_hidNeuron006
+         - fj_ParT_hidNeuron007
+         - fj_ParT_hidNeuron008
+         - fj_ParT_hidNeuron009
+         - fj_ParT_hidNeuron010
+         - fj_ParT_hidNeuron011
+         - fj_ParT_hidNeuron012
+         - fj_ParT_hidNeuron013
+         - fj_ParT_hidNeuron014
+         - fj_ParT_hidNeuron015
+         - fj_ParT_hidNeuron016
+         - fj_ParT_hidNeuron017
+         - fj_ParT_hidNeuron018
+         - fj_ParT_hidNeuron019
+         - fj_ParT_hidNeuron020
+         - fj_ParT_hidNeuron021
+         - fj_ParT_hidNeuron022
+         - fj_ParT_hidNeuron023
+         - fj_ParT_hidNeuron024
+         - fj_ParT_hidNeuron025
+         - fj_ParT_hidNeuron026
+         - fj_ParT_hidNeuron027
+         - fj_ParT_hidNeuron028
+         - fj_ParT_hidNeuron029
+         - fj_ParT_hidNeuron030
+         - fj_ParT_hidNeuron031
+         - fj_ParT_hidNeuron032
+         - fj_ParT_hidNeuron033
+         - fj_ParT_hidNeuron034
+         - fj_ParT_hidNeuron035
+         - fj_ParT_hidNeuron036
+         - fj_ParT_hidNeuron037
+         - fj_ParT_hidNeuron038
+         - fj_ParT_hidNeuron039
+         - fj_ParT_hidNeuron040
+         - fj_ParT_hidNeuron041
+         - fj_ParT_hidNeuron042
+         - fj_ParT_hidNeuron043
+         - fj_ParT_hidNeuron044
+         - fj_ParT_hidNeuron045
+         - fj_ParT_hidNeuron046
+         - fj_ParT_hidNeuron047
+         - fj_ParT_hidNeuron048
+         - fj_ParT_hidNeuron049
+         - fj_ParT_hidNeuron050
+         - fj_ParT_hidNeuron051
+         - fj_ParT_hidNeuron052
+         - fj_ParT_hidNeuron053
+         - fj_ParT_hidNeuron054
+         - fj_ParT_hidNeuron055
+         - fj_ParT_hidNeuron056
+         - fj_ParT_hidNeuron057
+         - fj_ParT_hidNeuron058
+         - fj_ParT_hidNeuron059
+         - fj_ParT_hidNeuron060
+         - fj_ParT_hidNeuron061
+         - fj_ParT_hidNeuron062
+         - fj_ParT_hidNeuron063
+         - fj_ParT_hidNeuron064
+         - fj_ParT_hidNeuron065
+         - fj_ParT_hidNeuron066
+         - fj_ParT_hidNeuron067
+         - fj_ParT_hidNeuron068
+         - fj_ParT_hidNeuron069
+         - fj_ParT_hidNeuron070
+         - fj_ParT_hidNeuron071
+         - fj_ParT_hidNeuron072
+         - fj_ParT_hidNeuron073
+         - fj_ParT_hidNeuron074
+         - fj_ParT_hidNeuron075
+         - fj_ParT_hidNeuron076
+         - fj_ParT_hidNeuron077
+         - fj_ParT_hidNeuron078
+         - fj_ParT_hidNeuron079
+         - fj_ParT_hidNeuron080
+         - fj_ParT_hidNeuron081
+         - fj_ParT_hidNeuron082
+         - fj_ParT_hidNeuron083
+         - fj_ParT_hidNeuron084
+         - fj_ParT_hidNeuron085
+         - fj_ParT_hidNeuron086
+         - fj_ParT_hidNeuron087
+         - fj_ParT_hidNeuron088
+         - fj_ParT_hidNeuron089
+         - fj_ParT_hidNeuron090
+         - fj_ParT_hidNeuron091
+         - fj_ParT_hidNeuron092
+         - fj_ParT_hidNeuron093
+         - fj_ParT_hidNeuron094
+         - fj_ParT_hidNeuron095
+         - fj_ParT_hidNeuron096
+         - fj_ParT_hidNeuron097
+         - fj_ParT_hidNeuron098
+         - fj_ParT_hidNeuron099
+         - fj_ParT_hidNeuron100
+         - fj_ParT_hidNeuron101
+         - fj_ParT_hidNeuron102
+         - fj_ParT_hidNeuron103
+         - fj_ParT_hidNeuron104
+         - fj_ParT_hidNeuron105
+         - fj_ParT_hidNeuron106
+         - fj_ParT_hidNeuron107
+         - fj_ParT_hidNeuron108
+         - fj_ParT_hidNeuron109
+         - fj_ParT_hidNeuron110
+         - fj_ParT_hidNeuron111
+         - fj_ParT_hidNeuron112
+         - fj_ParT_hidNeuron113
+         - fj_ParT_hidNeuron114
+         - fj_ParT_hidNeuron115
+         - fj_ParT_hidNeuron116
+         - fj_ParT_hidNeuron117
+         - fj_ParT_hidNeuron118
+         - fj_ParT_hidNeuron119
+         - fj_ParT_hidNeuron120
+         - fj_ParT_hidNeuron121
+         - fj_ParT_hidNeuron122
+         - fj_ParT_hidNeuron123
+         - fj_ParT_hidNeuron124
+         - fj_ParT_hidNeuron125
+         - fj_ParT_hidNeuron126
+         - fj_ParT_hidNeuron127
+         - fj_ParT_hidNeuron128
+         - fj_ParT_hidNeuron129
+         - fj_ParT_hidNeuron130
+         - fj_ParT_hidNeuron131
+         - fj_ParT_hidNeuron132
+         - fj_ParT_hidNeuron133
+         - fj_ParT_hidNeuron134
+         - fj_ParT_hidNeuron135
+         - fj_ParT_hidNeuron136
+         - fj_ParT_hidNeuron137
+         - fj_ParT_hidNeuron138
+         - fj_ParT_hidNeuron139
+         - fj_ParT_hidNeuron140
+         - fj_ParT_hidNeuron141
+         - fj_ParT_hidNeuron142
+         - fj_ParT_hidNeuron143
+         - fj_ParT_hidNeuron144
+         - fj_ParT_hidNeuron145
+         - fj_ParT_hidNeuron146
+         - fj_ParT_hidNeuron147
+         - fj_ParT_hidNeuron148
+         - fj_ParT_hidNeuron149
+         - fj_ParT_hidNeuron150
+         - fj_ParT_hidNeuron151
+         - fj_ParT_hidNeuron152
+         - fj_ParT_hidNeuron153
+         - fj_ParT_hidNeuron154
+         - fj_ParT_hidNeuron155
+         - fj_ParT_hidNeuron156
+         - fj_ParT_hidNeuron157
+         - fj_ParT_hidNeuron158
+         - fj_ParT_hidNeuron159
+         - fj_ParT_hidNeuron160
+         - fj_ParT_hidNeuron161
+         - fj_ParT_hidNeuron162
+         - fj_ParT_hidNeuron163
+         - fj_ParT_hidNeuron164
+         - fj_ParT_hidNeuron165
+         - fj_ParT_hidNeuron166
+         - fj_ParT_hidNeuron167
+         - fj_ParT_hidNeuron168
+         - fj_ParT_hidNeuron169
+         - fj_ParT_hidNeuron170
+         - fj_ParT_hidNeuron171
+         - fj_ParT_hidNeuron172
+         - fj_ParT_hidNeuron173
+         - fj_ParT_hidNeuron174
+         - fj_ParT_hidNeuron175
+         - fj_ParT_hidNeuron176
+         - fj_ParT_hidNeuron177
+         - fj_ParT_hidNeuron178
+         - fj_ParT_hidNeuron179
+         - fj_ParT_hidNeuron180
+         - fj_ParT_hidNeuron181
+         - fj_ParT_hidNeuron182
+         - fj_ParT_hidNeuron183
+         - fj_ParT_hidNeuron184
+         - fj_ParT_hidNeuron185
+         - fj_ParT_hidNeuron186
+         - fj_ParT_hidNeuron187
+         - fj_ParT_hidNeuron188
+         - fj_ParT_hidNeuron189
+         - fj_ParT_hidNeuron190
+         - fj_ParT_hidNeuron191
+         - fj_ParT_hidNeuron192
+         - fj_ParT_hidNeuron193
+         - fj_ParT_hidNeuron194
+         - fj_ParT_hidNeuron195
+         - fj_ParT_hidNeuron196
+         - fj_ParT_hidNeuron197
+         - fj_ParT_hidNeuron198
+         - fj_ParT_hidNeuron199
+         - fj_ParT_hidNeuron200
+         - fj_ParT_hidNeuron201
+         - fj_ParT_hidNeuron202
+         - fj_ParT_hidNeuron203
+         - fj_ParT_hidNeuron204
+         - fj_ParT_hidNeuron205
+         - fj_ParT_hidNeuron206
+         - fj_ParT_hidNeuron207
+         - fj_ParT_hidNeuron208
+         - fj_ParT_hidNeuron209
+         - fj_ParT_hidNeuron210
+         - fj_ParT_hidNeuron211
+         - fj_ParT_hidNeuron212
+         - fj_ParT_hidNeuron213
+         - fj_ParT_hidNeuron214
+         - fj_ParT_hidNeuron215
+         - fj_ParT_hidNeuron216
+         - fj_ParT_hidNeuron217
+         - fj_ParT_hidNeuron218
+         - fj_ParT_hidNeuron219
+         - fj_ParT_hidNeuron220
+         - fj_ParT_hidNeuron221
+         - fj_ParT_hidNeuron222
+         - fj_ParT_hidNeuron223
+         - fj_ParT_hidNeuron224
+         - fj_ParT_hidNeuron225
+         - fj_ParT_hidNeuron226
+         - fj_ParT_hidNeuron227
+         - fj_ParT_hidNeuron228
+         - fj_ParT_hidNeuron229
+         - fj_ParT_hidNeuron230
+         - fj_ParT_hidNeuron231
+         - fj_ParT_hidNeuron232
+         - fj_ParT_hidNeuron233
+         - fj_ParT_hidNeuron234
+         - fj_ParT_hidNeuron235
+         - fj_ParT_hidNeuron236
+         - fj_ParT_hidNeuron237
+         - fj_ParT_hidNeuron238
+         - fj_ParT_hidNeuron239
+         - fj_ParT_hidNeuron240
+         - fj_ParT_hidNeuron241
+         - fj_ParT_hidNeuron242
+         - fj_ParT_hidNeuron243
+         - fj_ParT_hidNeuron244
+         - fj_ParT_hidNeuron245
+         - fj_ParT_hidNeuron246
+         - fj_ParT_hidNeuron247
+         - fj_ParT_hidNeuron248
+         - fj_ParT_hidNeuron249
+         - fj_ParT_hidNeuron250
+         - fj_ParT_hidNeuron251
+         - fj_ParT_hidNeuron252
+         - fj_ParT_hidNeuron253
+         - fj_ParT_hidNeuron254
+         - fj_ParT_hidNeuron255
+
+
+labels:
+   ### type can be `simple`, `custom`
+   ### [option 1] use `simple` for binary/multi-class classification, then `value` is a list of 0-1 labels
+   type: simple
+   value: [label_Wplus, label_Wminus, label_Z, label_QCD]
+
+   ### [option 2] otherwise use `custom` to define the label, then `value` is a map
+   # type: custom
+   # value:
+   # target_mass: np.where(fj_isQCD, fj_genjet_sdmass, fj_gen_mass)
+
+observers:
+   - fj_pt
+   - fj_msoftdrop
+   - fj_eta
+   - fj_phi
+   - label_Wplus
+   - label_Wminus
+   - label_Z
+   - label_QCD
+   # Official CMS tagger scores, carried through for benchmarking against our fine-tuned model
+   - fj_globalParT3_WvsQCD
+   - fj_globalParT3_QCD
+   - fj_globalParT3_Xbb
+   - fj_globalParT3_Xcc
+   - fj_globalParT3_Xcs
+   - fj_globalParT3_Xqq
+   - fj_particleNetWithMass_WvsQCD
+   - fj_particleNetWithMass_ZvsQCD
+   - fj_particleNetWithMass_QCD
+   - fj_particleNet_QCD0HF
+   - fj_particleNet_QCD1HF
+   - fj_particleNet_QCD2HF
+   - fj_particleNet_XqqVsQCD
+   - fj_particleNet_XbbVsQCD
+   - fj_particleNet_XccVsQCD
+   - fj_particleNetLegacy_QCD
+   - fj_particleNetLegacy_Xbb
+   - fj_particleNetLegacy_Xcc
+   - fj_particleNetLegacy_Xqq
+   - fj_particleNetLegacy_mass
+
+weights:
+   ### [option 1] use precomputed weights stored in the input files
+   # use_precomputed_weights: true
+   # weight_branches: [weight, class_weight]
+   ### [option 2] compute weights on-the-fly using reweighting histograms
+   use_precomputed_weights: false
+   reweight_discard_under_overflow: false
+   reweight_method: flat
+
+   reweight_vars:
+      ### 08_pt_reweighting: data-driven log-spaced edges (fine log grid, greedy-merged until every
+      ### class has >=5000 jets/bin on the 07_baseline_tracker population) -- see
+      ### run_outputs/08_pt_reweighting/experiments.md for the derivation. fj_msoftdrop stays a
+      ### single wide bin (unchanged) so the real substructure discriminant isn't flattened.
+      fj_pt: [200, 233, 271, 315, 396, 438, 472, 509, 549, 593, 639, 689, 763, 2500]
+      fj_msoftdrop: [-10000, 10000]
+   reweight_classes: [label_Wplus, label_Wminus, label_Z, label_QCD]
+   class_weights: [1, 1, 1, 1]
+   reweight_hists:
