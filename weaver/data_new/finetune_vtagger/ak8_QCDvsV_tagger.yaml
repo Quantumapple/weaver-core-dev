@@ -341,5 +341,16 @@ weights:
       fj_pt: [200, 2500]
       fj_msoftdrop: [-10000, 10000]
    reweight_classes: [label_V, label_QCD]
-   class_weights: [1, 1]
+   ### 20_stage1_qcd_vs_v_classweight_fix: class_weights: [1, 1] (used by 19_stage1_qcd_vs_v)
+   ### let the "flat" equalization mechanism boost each QCD jet's per-event weight ~3.86x
+   ### relative to each V-jet (since V:QCD raw counts are 396510:102740 in trainval, a 3.86:1
+   ### imbalance -- much bigger than any imbalance in the 4-way problem), which pushed the
+   ### decision boundary to sacrifice V-jet recall (14.2% lost to QCD, worse than the flat
+   ### 4-way classifier's implicit 8.7%) to protect QCD recall. Since stage-1 errors in either
+   ### direction are equally fatal to the final composite accuracy (see run_outputs/
+   ### 19_stage1_qcd_vs_v/experiments.md), there's no reason to favor one class's recall --
+   ### class_weights: [3.859, 1] exactly cancels the equalization, giving natural/uniform
+   ### per-event weighting (matches the true population ratio, computed directly from
+   ### ak8_hidneuron_trainval.parquet).
+   class_weights: [3.859, 1]
    reweight_hists:
