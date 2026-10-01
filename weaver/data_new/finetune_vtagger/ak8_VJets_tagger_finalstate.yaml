@@ -25,6 +25,21 @@
 ### never be referenced in a new_variables expression -- these booleans must already exist as raw
 ### columns (see ak8_VJets_hidneuron_extraction.yaml's observers).
 
+### selection: drops the Cabibbo-suppressed cross-generation W decays (W+->us~/cd~, W-->u~s/d~c),
+### i.e. jets with label_Wplus==1 or label_Wminus==1 but matching neither _ud nor _cs. Measured rate:
+### 5.10% of Wplus, 5.04% of Wminus (Z and QCD are 0% unmatched -- Z_qq/QCD_other already cover
+### everything). This rate matches sin^2(Cabibbo angle) ~ 4.9%, confirming these are a real but
+### low-stats physics sub-channel, not a matching failure. Rather than adding Wplus_cross/
+### Wminus_cross as a 13th/14th trained class (which would still receive gradient from CrossEntropy
+### and isn't worth a dedicated output neuron at ~5% stats), these rows are filtered out here so the
+### model only ever sees the 12 well-populated final-state classes, and every surviving row is
+### guaranteed to match exactly one of them (fixes weaver's "not assigned to any class" error).
+selection: >-
+    ~(
+        ((label_Wplus == 1) & (fj_isWplus_ud != 1) & (fj_isWplus_cs != 1)) |
+        ((label_Wminus == 1) & (fj_isWminus_ud != 1) & (fj_isWminus_cs != 1))
+    )
+
 preprocess:
    ### method: [manual, auto] - whether to use manually specified parameters for variable standardization
    ### auto: this MLP is trained from scratch on our own embeddings, so standardize from our own data
