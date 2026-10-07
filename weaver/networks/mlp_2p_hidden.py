@@ -53,7 +53,11 @@ def get_model(data_config, **kwargs):
     # suggesting 128,64 has more capacity than this problem needs. Testing a much smaller
     # architecture (a quarter of the units: 32,16) directly, with dropout back to 0, to see if the
     # capacity reduction alone (no regularization needed) avoids the severe overfitting seen in 10.
-    layer_params = (32, 16)
+    # 33_hidden_layers_rescale: 10/17's overfitting verdict was measured at 499,250 trainval jets;
+    # the current reference pool (30_reference_model) has 3,563,966 trainval jets (~7.1x more).
+    # Re-testing capacity at this larger scale, since overfitting depends on params-vs-data, not
+    # params alone -- the 10/17 conclusion may be stale now that stats have grown this much.
+    layer_params = (64, 32)
     preinput_dims = len(data_config.input_dicts['basic'])
     input_dims = len(data_config.input_dicts['highlevel'])
     num_classes = len(data_config.label_value)
