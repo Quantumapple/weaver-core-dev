@@ -21,6 +21,17 @@ new_variables:
 
     is_charged: pfcands_charge != 0
 
+    # jet charge, Field-Feynman / pT-weighted family: Q_k = (1/fj_pt^k) * sum_i(charge_i * pt_i^k).
+    # k=0 is the plain unweighted sum of constituent charges; k=0.3/0.5/1.0 follow the pT-weighted
+    # definitions used in ATLAS/CMS boosted-W/Z jet-charge studies (arXiv:1509.04939, 1908.08256).
+    # All four kept as separate jet-level scalars so a single k can be picked later at train time
+    # without re-running this extraction step.
+    pfcands_pt: np.hypot(pfcands_px, pfcands_py)
+    fj_charge_k0p0: ak.sum(pfcands_charge, 1)
+    fj_charge_k0p3: ak.sum(pfcands_charge * pfcands_pt**0.3, 1) / fj_pt**0.3
+    fj_charge_k0p5: ak.sum(pfcands_charge * pfcands_pt**0.5, 1) / fj_pt**0.5
+    fj_charge_k1p0: ak.sum(pfcands_charge * pfcands_pt, 1) / fj_pt
+
     # --- charged (cpf) --- already pt-sorted in tagger_input.py, no re-sort needed
     cpfcandlt_pt_log_nopuppi_sort: pfcands_logpt[is_charged]
     cpfcandlt_e_log_nopuppi_sort: pfcands_loge[is_charged]
@@ -230,6 +241,11 @@ observers:
     - fj_particleNetLegacy_Xcc
     - fj_particleNetLegacy_Xqq
     - fj_particleNetLegacy_mass
+    # jet charge, several kappa values -- pick one at train time
+    - fj_charge_k0p0
+    - fj_charge_k0p3
+    - fj_charge_k0p5
+    - fj_charge_k1p0
     ### saved directly here (not derived from _label_ downstream) since weaver's variable-name
     ### resolver excludes any underscore-prefixed identifier -- `_label_` can never be referenced
     ### in a later yaml's new_variables expression, so the boolean class flags must be captured now.
