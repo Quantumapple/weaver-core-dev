@@ -3,8 +3,8 @@
 
 ### special_run_for_kappa_search: NOT part of the main numbered run_outputs/NN_name pipeline. Reads
 ### the output of ak8_VJets_hidneuron_extraction_kappa_search.yaml (not the canonical extraction
-### file). Adds two new padded point-cloud `inputs` groups, `cand_charge_pt`/`cand_mask`, carrying
-### per-candidate charge/pT/mask (length=90, zero-padded) instead of a single precomputed jet-charge
+### file). Adds one new padded `inputs` group, `cand_spt`, carrying
+### per-candidate signed pT = charge*pt (length=90, zero-padded) instead of a single precomputed jet-charge
 ### scalar. Paired with `mlp_2p_learnkappa.py`, which computes
 ### Q_kappa = (1/fj_pt^kappa) * sum_i(charge_i * pt_i^kappa) from these inside the model's forward
 ### pass with kappa as an `nn.Parameter` -- i.e. kappa is fit jointly with the rest of the MLP head by
@@ -330,18 +330,15 @@ inputs:
    # that yaml's comment), so `length: 90` here is a no-op safety net, not the actual padding step.
    # Consumed directly by mlp_2p_learnkappa.py's LearnableJetCharge module, not concatenated into
    # `basic`.
-   cand_charge_pt:
+   # Single signed-pT column (charge*pt, zero-padded): sign = charge, magnitude = pT, padding = 0
+   # contributes nothing, so no separate charge/pt/mask groups are needed. One var + length=90 stacks
+   # to (N, 90) -- the `len(names) == 1` branch of weaver's _finalize_inputs only skips the stacking
+   # axis when length is None, so with length=90 this arrives as (N, 1, 90).
+   cand_spt:
       length: 90
       pad_mode: constant
       vars:
-         - [cand_charge_obs, 0]
-         - [cand_pt_obs, 0]
-
-   cand_mask:
-      length: 90
-      pad_mode: constant
-      vars:
-         - cand_mask_obs
+         - cand_spt
 
 
 labels:

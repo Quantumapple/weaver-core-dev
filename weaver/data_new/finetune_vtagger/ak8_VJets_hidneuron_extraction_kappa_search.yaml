@@ -12,7 +12,7 @@
 ### per-candidate arrays also makes Q_kappa for *any* kappa recomputable after the fact, so those 4
 ### precomputed scalars are dropped here as redundant.
 ### `observers` below is also trimmed to the minimum this experiment needs (fj_pt, fj_msoftdrop,
-### labels, the 3 new per-candidate columns) -- dropping the CMS benchmark scores and finalstate
+### labels, the new per-candidate cand_spt column) -- dropping the CMS benchmark scores and finalstate
 ### sub-labels that the main pipeline carries keeps this side dataset smaller, since it's not meant to
 ### feed into the main comparison chain.
 ###
@@ -49,9 +49,13 @@ new_variables:
     # below) ourselves first, using the exact same pattern weaver's `_pad()` uses internally
     # (utils/data/tools.py) -- ak.pad_none(..., clip=True) then ak.fill_none(..., value) -- so the
     # column is already regular (N, 90) by the time it reaches the observer-saving step.
-    cand_charge_obs: ak.fill_none(ak.pad_none(pfcands_charge[is_charged], 90, clip=True), 0.)
-    cand_pt_obs: ak.fill_none(ak.pad_none(pfcands_pt[is_charged], 90, clip=True), 0.)
-    cand_mask_obs: ak.fill_none(ak.pad_none(ak.ones_like(pfcands_charge[is_charged]), 90, clip=True), 0.)
+    #
+    # Speed/size: ONE float32 column instead of separate charge/pt/mask float64 columns. Charged
+    # candidates have charge exactly +-1, so signed pT s_i = charge_i * pt_i carries both: sign(s_i)
+    # is the charge, |s_i| is the pT, and the zero padding contributes nothing to
+    # sum_i sign(s_i)*|s_i|^kappa, so no mask column is needed either. 3 float64 columns -> 1 float32
+    # column is ~6x less data to accumulate in memory and write out per chunk.
+    cand_spt: ak.values_astype(ak.fill_none(ak.pad_none((pfcands_charge * pfcands_pt)[is_charged], 90, clip=True), 0.), 'float32')
 
     # --- charged (cpf) --- already pt-sorted in tagger_input.py, no re-sort needed
     cpfcandlt_pt_log_nopuppi_sort: pfcands_logpt[is_charged]
@@ -246,7 +250,7 @@ observers:
     - fj_isZ_bb
     - fj_isZ_cc
     - fj_isZ_qq
-    # per-candidate (charged) charge/pT/mask -- jagged, one entry per real candidate per jet
-    - cand_charge_obs
-    - cand_pt_obs
-    - cand_mask_obs
+    # per-candidate (charged) signed pT = charge*pt, zero-padded to a fixed width of 90 -> (N, 90)
+    # float32. Needs the forked save_fn in ..._hidneuron_extract_kappa_search.py (the stock one drops
+    # any observer that isn't 1D).
+    - cand_spt
