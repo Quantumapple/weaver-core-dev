@@ -41,12 +41,17 @@ new_variables:
     pfcands_pt: np.hypot(pfcands_px, pfcands_py)
 
     # Per-candidate (charged only -- neutrals have charge=0 and don't contribute to Q_kappa)
-    # charge/pT/mask, kept jagged (one entry per real candidate, no padding) so Step 3 can pad them
-    # itself into a fixed-length (length=90, matching cpf_mask below) tensor and compute
-    # Q_kappa = (1/fj_pt^kappa) * sum_i(charge_i * pt_i^kappa) for a *learnable* kappa at train time.
-    cand_charge_obs: pfcands_charge[is_charged]
-    cand_pt_obs: pfcands_pt[is_charged]
-    cand_mask_obs: ak.ones_like(cand_charge_obs)
+    # charge/pT/mask, so Step 3 can compute Q_kappa = (1/fj_pt^kappa) * sum_i(charge_i * pt_i^kappa)
+    # for a *learnable* kappa at train time. Observers go through a bare `ak.to_numpy(table[k])`
+    # with no padding step (unlike `inputs:` groups, which call weaver's own `_pad()` first) --
+    # saving these jagged (variable length per jet) raises "cannot convert to RegularArray because
+    # subarray lengths are not regular". Pad to a fixed length (90, matching cpf_mask's length
+    # below) ourselves first, using the exact same pattern weaver's `_pad()` uses internally
+    # (utils/data/tools.py) -- ak.pad_none(..., clip=True) then ak.fill_none(..., value) -- so the
+    # column is already regular (N, 90) by the time it reaches the observer-saving step.
+    cand_charge_obs: ak.fill_none(ak.pad_none(pfcands_charge[is_charged], 90, clip=True), 0.)
+    cand_pt_obs: ak.fill_none(ak.pad_none(pfcands_pt[is_charged], 90, clip=True), 0.)
+    cand_mask_obs: ak.fill_none(ak.pad_none(ak.ones_like(pfcands_charge[is_charged]), 90, clip=True), 0.)
 
     # --- charged (cpf) --- already pt-sorted in tagger_input.py, no re-sort needed
     cpfcandlt_pt_log_nopuppi_sort: pfcands_logpt[is_charged]

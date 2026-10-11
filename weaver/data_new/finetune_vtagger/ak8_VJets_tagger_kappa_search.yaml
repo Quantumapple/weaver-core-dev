@@ -325,8 +325,11 @@ inputs:
          - fj_ParT_hidNeuron255
 
    # Per-candidate (charged) charge/pT, zero-padded to 90 (matches cpf_mask's length in the
-   # extraction yaml -- true candidate count is always <= 90 there). Consumed directly by
-   # mlp_2p_learnkappa.py's LearnableJetCharge module, not concatenated into `basic`.
+   # extraction yaml -- true candidate count is always <= 90 there). Already pre-padded to exactly
+   # 90 in the extraction yaml itself (weaver's observer-saving step can't pad jagged columns, see
+   # that yaml's comment), so `length: 90` here is a no-op safety net, not the actual padding step.
+   # Consumed directly by mlp_2p_learnkappa.py's LearnableJetCharge module, not concatenated into
+   # `basic`.
    cand_charge_pt:
       length: 90
       pad_mode: constant
