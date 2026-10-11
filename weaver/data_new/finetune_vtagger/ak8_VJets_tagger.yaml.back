@@ -1,0 +1,209 @@
+### use `&`, `|`, `~` for logical operations on numpy arrays
+### can use functions from `math`, `np` (numpy), and `ak` in the expression
+
+## Note: if it's a higgs then it has to be matched (note: fj_genRes_mass=125 for higgs else 0)
+selection: >-
+   (fj_msoftdrop > 40)
+
+### selection to apply at test time (i.e., when running w/ --predict)
+test_time_selection: >-
+   (fj_msoftdrop > 40)
+
+new_variables:
+   ### [format] name: formula
+   ### can use functions from `math`, `np` (numpy), and `ak` in the expression
+
+   class_Wplus:  (fj_isWplus_Matched == 1)
+   class_Wminus: (fj_isWminus_Matched == 1)
+   class_Z:      (fj_isZ_Matched == 1)
+   class_QCD:    (fj_isQCD_Matched == 1)
+
+
+preprocess:
+   ### method: [manual, auto] - whether to use manually specified parameters for variable standardization
+   ### [note]: `[var]_mask` will not be transformed even if `method=auto`
+   method: manual
+   ### data_fraction: fraction of events to use when calculating the mean/scale for the standardization
+   data_fraction:
+
+# it clips from -5 to 5 by default [minus, multiplies, clip min, clip max]: +1 then take log()
+inputs:
+   basic:
+      length: null
+      vars:
+         - fj_pt
+         - fj_msoftdrop
+         # - fj_eta
+         # - fj_phi
+
+   highlevel:
+      length: null
+      vars:
+         - fj_ParT_hidNeuron000
+         - fj_ParT_hidNeuron001
+         - fj_ParT_hidNeuron002
+         - fj_ParT_hidNeuron003
+         - fj_ParT_hidNeuron004
+         - fj_ParT_hidNeuron005
+         - fj_ParT_hidNeuron006
+         - fj_ParT_hidNeuron007
+         - fj_ParT_hidNeuron008
+         - fj_ParT_hidNeuron009
+         - fj_ParT_hidNeuron010
+         - fj_ParT_hidNeuron011
+         - fj_ParT_hidNeuron012
+         - fj_ParT_hidNeuron013
+         - fj_ParT_hidNeuron014
+         - fj_ParT_hidNeuron015
+         - fj_ParT_hidNeuron016
+         - fj_ParT_hidNeuron017
+         - fj_ParT_hidNeuron018
+         - fj_ParT_hidNeuron019
+         - fj_ParT_hidNeuron020
+         - fj_ParT_hidNeuron021
+         - fj_ParT_hidNeuron022
+         - fj_ParT_hidNeuron023
+         - fj_ParT_hidNeuron024
+         - fj_ParT_hidNeuron025
+         - fj_ParT_hidNeuron026
+         - fj_ParT_hidNeuron027
+         - fj_ParT_hidNeuron028
+         - fj_ParT_hidNeuron029
+         - fj_ParT_hidNeuron030
+         - fj_ParT_hidNeuron031
+         - fj_ParT_hidNeuron032
+         - fj_ParT_hidNeuron033
+         - fj_ParT_hidNeuron034
+         - fj_ParT_hidNeuron035
+         - fj_ParT_hidNeuron036
+         - fj_ParT_hidNeuron037
+         - fj_ParT_hidNeuron038
+         - fj_ParT_hidNeuron039
+         - fj_ParT_hidNeuron040
+         - fj_ParT_hidNeuron041
+         - fj_ParT_hidNeuron042
+         - fj_ParT_hidNeuron043
+         - fj_ParT_hidNeuron044
+         - fj_ParT_hidNeuron045
+         - fj_ParT_hidNeuron046
+         - fj_ParT_hidNeuron047
+         - fj_ParT_hidNeuron048
+         - fj_ParT_hidNeuron049
+         - fj_ParT_hidNeuron050
+         - fj_ParT_hidNeuron051
+         - fj_ParT_hidNeuron052
+         - fj_ParT_hidNeuron053
+         - fj_ParT_hidNeuron054
+         - fj_ParT_hidNeuron055
+         - fj_ParT_hidNeuron056
+         - fj_ParT_hidNeuron057
+         - fj_ParT_hidNeuron058
+         - fj_ParT_hidNeuron059
+         - fj_ParT_hidNeuron060
+         - fj_ParT_hidNeuron061
+         - fj_ParT_hidNeuron062
+         - fj_ParT_hidNeuron063
+         - fj_ParT_hidNeuron064
+         - fj_ParT_hidNeuron065
+         - fj_ParT_hidNeuron066
+         - fj_ParT_hidNeuron067
+         - fj_ParT_hidNeuron068
+         - fj_ParT_hidNeuron069
+         - fj_ParT_hidNeuron070
+         - fj_ParT_hidNeuron071
+         - fj_ParT_hidNeuron072
+         - fj_ParT_hidNeuron073
+         - fj_ParT_hidNeuron074
+         - fj_ParT_hidNeuron075
+         - fj_ParT_hidNeuron076
+         - fj_ParT_hidNeuron077
+         - fj_ParT_hidNeuron078
+         - fj_ParT_hidNeuron079
+         - fj_ParT_hidNeuron080
+         - fj_ParT_hidNeuron081
+         - fj_ParT_hidNeuron082
+         - fj_ParT_hidNeuron083
+         - fj_ParT_hidNeuron084
+         - fj_ParT_hidNeuron085
+         - fj_ParT_hidNeuron086
+         - fj_ParT_hidNeuron087
+         - fj_ParT_hidNeuron088
+         - fj_ParT_hidNeuron089
+         - fj_ParT_hidNeuron090
+         - fj_ParT_hidNeuron091
+         - fj_ParT_hidNeuron092
+         - fj_ParT_hidNeuron093
+         - fj_ParT_hidNeuron094
+         - fj_ParT_hidNeuron095
+         - fj_ParT_hidNeuron096
+         - fj_ParT_hidNeuron097
+         - fj_ParT_hidNeuron098
+         - fj_ParT_hidNeuron099
+         - fj_ParT_hidNeuron100
+         - fj_ParT_hidNeuron101
+         - fj_ParT_hidNeuron102
+         - fj_ParT_hidNeuron103
+         - fj_ParT_hidNeuron104
+         - fj_ParT_hidNeuron105
+         - fj_ParT_hidNeuron106
+         - fj_ParT_hidNeuron107
+         - fj_ParT_hidNeuron108
+         - fj_ParT_hidNeuron109
+         - fj_ParT_hidNeuron110
+         - fj_ParT_hidNeuron111
+         - fj_ParT_hidNeuron112
+         - fj_ParT_hidNeuron113
+         - fj_ParT_hidNeuron114
+         - fj_ParT_hidNeuron115
+         - fj_ParT_hidNeuron116
+         - fj_ParT_hidNeuron117
+         - fj_ParT_hidNeuron118
+         - fj_ParT_hidNeuron119
+         - fj_ParT_hidNeuron120
+         - fj_ParT_hidNeuron121
+         - fj_ParT_hidNeuron122
+         - fj_ParT_hidNeuron123
+         - fj_ParT_hidNeuron124
+         - fj_ParT_hidNeuron125
+         - fj_ParT_hidNeuron126
+         - fj_ParT_hidNeuron127
+
+labels:
+   ### type can be `simple`, `custom`
+   ### [option 1] use `simple` for binary/multi-class classification, then `value` is a list of 0-1 labels
+   type: simple
+   value: [class_Wplus, class_Wminus, class_Z, class_QCD]
+
+   ### [option 2] otherwise use `custom` to define the label, then `value` is a map
+   # type: custom
+   # value:
+   # target_mass: np.where(fj_isQCD, fj_genjet_sdmass, fj_gen_mass)
+
+observers:
+   - fj_pt
+   - fj_msoftdrop
+   - fj_eta
+   - fj_phi
+   - class_Wplus
+   - class_Wminus
+   - class_Z
+   - class_QCD
+   - fj_ParT_mass
+   - fj_ParT_score
+
+weights:
+   ### [option 1] use precomputed weights stored in the input files
+   # use_precomputed_weights: true
+   # weight_branches: [weight, class_weight]
+   ### [option 2] compute weights on-the-fly using reweighting histograms
+   use_precomputed_weights: false
+   reweight_discard_under_overflow: false
+   reweight_method: flat
+
+   reweight_vars:
+      # fj_pt: [200, 300, 400, 600, 2500]
+      fj_pt: [200, 2500]
+      fj_msoftdrop: [-10000, 10000]
+   reweight_classes: [class_Wplus, class_Wminus, class_Z, class_QCD]
+   class_weights: [1, 1, 1, 1]
+   reweight_hists:
