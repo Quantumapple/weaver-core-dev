@@ -44,13 +44,21 @@ class MultiLayerPerceptron2Path(nn.Module):
         return self.mlp(torch.cat((self.premlp(xp), x), dim=1))
 
 
+class MultiLayerPerceptron2PathSoftmax(MultiLayerPerceptron2Path):
+    """ONNX-export variant: same layers/parameter names as MultiLayerPerceptron2Path (checkpoints load unchanged),
+    but forward() returns softmax probabilities. Use ONLY for --export-onnx, not for training (the loss expects logits)."""
+
+    def forward(self, xp, x):
+        return torch.softmax(super().forward(xp, x), dim=1)
+
+
 def get_model(data_config, **kwargs):
     prelayer_params = (32, 32)
     layer_params = ()
     preinput_dims = len(data_config.input_dicts['basic'])
     input_dims = len(data_config.input_dicts['highlevel'])
     num_classes = len(data_config.label_value)
-    model = MultiLayerPerceptron2Path(preinput_dims, input_dims, num_classes, prelayer_params=prelayer_params, layer_params=layer_params)
+    model = MultiLayerPerceptron2PathSoftmax(preinput_dims, input_dims, num_classes, prelayer_params=prelayer_params, layer_params=layer_params)
 
     model_info = {
         'input_names':list(data_config.input_names),
