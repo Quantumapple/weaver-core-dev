@@ -259,6 +259,10 @@ class DataConfig(object):
                     if var_name.startswith(s):
                         j[k]['min_length'] = min_len
                         break
+                if j[k]['min_length'] is None and self.preprocess_params[var_name]['length'] is None:
+                    # jet-level input (length: null), e.g. the MLP head: written as length 1, like `jet_features` in NanoTuples
+                    j[k]['max_length'] = 1
+                    j[k]['min_length'] = 1
                 if j[k]['min_length'] is None:
                     raise ValueError('unknown var_name: %s' % var_name)
                 info = self.preprocess_params[var_name]
